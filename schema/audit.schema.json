@@ -1,0 +1,351 @@
+{
+  "$id": "https://loupe.audit/schema/audit.schema.json",
+  "title": "Loupe landing page audit findings file",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "audit_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "client": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "contact": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "page": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "conversion_goal": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "audience": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "current_metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "source": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "period": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "label",
+              "value",
+              "source"
+            ]
+          }
+        }
+      },
+      "required": [
+        "url",
+        "conversion_goal",
+        "audience"
+      ]
+    },
+    "audited_on": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "delivered_on": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "rubric_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20
+    },
+    "verdict": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 400
+    },
+    "findings": {
+      "minItems": 1,
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:[-.][a-z0-9]+)*$"
+              },
+              {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:[-.][a-z0-9]+)*--[0-9a-f]{8}$"
+              }
+            ]
+          },
+          "check": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[-.][a-z0-9]+)*$"
+          },
+          "locator": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "pillar": {
+            "type": "string",
+            "enum": [
+              "structural",
+              "behavioral",
+              "pre-build",
+              "user-testing"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "moderate",
+              "low"
+            ]
+          },
+          "effort": {
+            "type": "string",
+            "enum": [
+              "quick",
+              "medium",
+              "large"
+            ]
+          },
+          "observation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000
+          },
+          "evidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "screenshot"
+                    },
+                    "src": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4000000
+                    },
+                    "caption": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 400
+                    },
+                    "viewport": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "src",
+                    "caption"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "metric"
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "period": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "label",
+                    "value",
+                    "source"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "note"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1500
+                    },
+                    "source": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "text"
+                  ]
+                }
+              ]
+            }
+          },
+          "impact": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1200
+              },
+              "business": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1200
+              }
+            },
+            "required": [
+              "user",
+              "business"
+            ]
+          },
+          "recommendations": {
+            "type": "object",
+            "properties": {
+              "quick": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "medium": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "long_term": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              }
+            }
+          },
+          "rubric_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "id",
+          "check",
+          "title",
+          "pillar",
+          "severity",
+          "effort",
+          "observation",
+          "evidence",
+          "impact",
+          "recommendations",
+          "rubric_version"
+        ]
+      }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 400
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "audit_id",
+    "client",
+    "page",
+    "audited_on",
+    "rubric_version",
+    "findings"
+  ]
+}

@@ -1,0 +1,230 @@
+{
+  "$id": "https://loupe.audit/schema/brand.schema.json",
+  "title": "Loupe report branding config",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tagline": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "logo": {
+      "type": "object",
+      "properties": {
+        "svg": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataUri": {
+          "type": "string",
+          "pattern": "^data:.*"
+        },
+        "widthMm": {
+          "default": 34,
+          "type": "number",
+          "minimum": 5,
+          "maximum": 120
+        },
+        "alt": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "alt"
+      ]
+    },
+    "palette": {
+      "type": "object",
+      "properties": {
+        "surface": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+        },
+        "surfaceAlt": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+        },
+        "ink": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+        },
+        "inkMuted": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+        },
+        "rule": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+        },
+        "accent": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+        },
+        "onAccent": {
+          "type": "string",
+          "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+        },
+        "severity": {
+          "type": "object",
+          "properties": {
+            "critical": {
+              "type": "string",
+              "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+            },
+            "high": {
+              "type": "string",
+              "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+            },
+            "moderate": {
+              "type": "string",
+              "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+            },
+            "low": {
+              "type": "string",
+              "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+            }
+          },
+          "required": [
+            "critical",
+            "high",
+            "moderate",
+            "low"
+          ]
+        }
+      },
+      "required": [
+        "surface",
+        "surfaceAlt",
+        "ink",
+        "inkMuted",
+        "rule",
+        "accent",
+        "onAccent",
+        "severity"
+      ]
+    },
+    "typography": {
+      "type": "object",
+      "properties": {
+        "headingStack": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bodyStack": {
+          "type": "string",
+          "minLength": 1
+        },
+        "monoStack": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basePt": {
+          "type": "number",
+          "minimum": 7,
+          "maximum": 14
+        },
+        "baseLineHeight": {
+          "type": "number",
+          "minimum": 1.1,
+          "maximum": 2
+        }
+      },
+      "required": [
+        "headingStack",
+        "bodyStack",
+        "monoStack",
+        "basePt",
+        "baseLineHeight"
+      ]
+    },
+    "footer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+        },
+        "website": {
+          "type": "string",
+          "minLength": 1
+        },
+        "abn": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "page": {
+      "default": {
+        "format": "A4",
+        "marginMm": {
+          "top": 18,
+          "right": 16,
+          "bottom": 20,
+          "left": 16
+        }
+      },
+      "type": "object",
+      "properties": {
+        "format": {
+          "default": "A4",
+          "type": "string",
+          "enum": [
+            "A4",
+            "Letter"
+          ]
+        },
+        "marginMm": {
+          "default": {
+            "top": 18,
+            "right": 16,
+            "bottom": 20,
+            "left": 16
+          },
+          "type": "object",
+          "properties": {
+            "top": {
+              "type": "number"
+            },
+            "right": {
+              "type": "number"
+            },
+            "bottom": {
+              "type": "number"
+            },
+            "left": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "top",
+            "right",
+            "bottom",
+            "left"
+          ]
+        }
+      }
+    }
+  },
+  "required": [
+    "key",
+    "name",
+    "palette",
+    "typography",
+    "footer"
+  ]
+}

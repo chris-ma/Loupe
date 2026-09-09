@@ -1,0 +1,13 @@
+export { auditSchema, findingSchema, SCHEMA_VERSION } from "./schema/audit.ts";
+export type { Audit, Finding, Evidence, Recommendations } from "./schema/audit.ts";
+export { brandSchema, parseBrand } from "./schema/brand.ts";
+export type { Brand } from "./schema/brand.ts";
+export { deriveFindingId, isDerivedId, pageKey, clientSlug } from "./schema/ids.ts";
+export { validateAudit, parseAudit } from "./schema/validate.ts";
+export type { ValidationResult, ValidationIssue } from "./schema/validate.ts";
+export * as rubricV1 from "./rubric/v1.ts";
+export { inlineAssets } from "./render/assets.ts";
+export { renderReportHtml, renderFooterTemplate, TEMPLATE_VERSION } from "./render/template.ts";
+export type { RenderContext } from "./render/template.ts";
+export { ReportRenderer, renderPdfOnce } from "./render/pdf.ts";
+export { saveAudit, listAudits, loadLatestAudit, DEFAULT_STORE_ROOT } from "./store.ts";

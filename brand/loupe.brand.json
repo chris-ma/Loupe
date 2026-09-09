@@ -1,0 +1,40 @@
+{
+  "key": "loupe",
+  "name": "Loupe",
+  "tagline": "Landing page audits",
+  "logo": {
+    "alt": "Loupe",
+    "widthMm": 30,
+    "svg": "<svg viewBox=\"0 0 120 40\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Loupe\"><circle cx=\"16\" cy=\"17\" r=\"10.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.6\"/><line x1=\"23.6\" y1=\"24.6\" x2=\"31\" y2=\"32\" stroke=\"currentColor\" stroke-width=\"2.6\" stroke-linecap=\"round\"/><text x=\"40\" y=\"25\" font-family=\"Georgia, serif\" font-size=\"21\" letter-spacing=\"1.2\" fill=\"currentColor\">Loupe</text></svg>"
+  },
+  "palette": {
+    "surface": "#ffffff",
+    "surfaceAlt": "#f6f5f2",
+    "ink": "#16171a",
+    "inkMuted": "#5f636b",
+    "rule": "#d9d7d1",
+    "accent": "#1f4b7a",
+    "onAccent": "#ffffff",
+    "severity": {
+      "critical": "#a02020",
+      "high": "#b5621b",
+      "moderate": "#8a7415",
+      "low": "#5f636b"
+    }
+  },
+  "typography": {
+    "headingStack": "\"Iowan Old Style\", \"Palatino Linotype\", Palatino, Georgia, \"Times New Roman\", serif",
+    "bodyStack": "\"Helvetica Neue\", Helvetica, Arial, \"Segoe UI\", system-ui, sans-serif",
+    "monoStack": "\"SFMono-Regular\", Menlo, Consolas, \"Liberation Mono\", monospace",
+    "basePt": 9.5,
+    "baseLineHeight": 1.5
+  },
+  "footer": "Loupe — landing page audit",
+  "contact": {
+    "website": "loupe.audit"
+  },
+  "page": {
+    "format": "A4",
+    "marginMm": { "top": 16, "right": 15, "bottom": 18, "left": 15 }
+  }
+}

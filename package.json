@@ -1,0 +1,30 @@
+{
+  "name": "loupe",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Landing page audit report generator: structured findings in, branded PDF out.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "bin": {
+    "loupe": "./src/cli.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test \"test/*.test.ts\"",
+    "schema": "node src/scripts/emit-schema.ts",
+    "sample": "node src/cli.ts render examples/meridian-physio.audit.json --out examples/meridian-physio-specimen.pdf",
+    "sample:assets": "node src/scripts/make-sample-assets.ts",
+    "serve": "node src/server.ts"
+  },
+  "dependencies": {
+    "playwright": "1.63.0",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.0",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,306 @@
+{
+  "$schema": "../schema/audit.schema.json",
+  "schema_version": "1.0",
+  "audit_id": "2026-09-04-meridian-physio-specimen",
+  "client": {
+    "name": "Meridian Physio (specimen)",
+    "contact": "practice.manager@example.com"
+  },
+  "page": {
+    "url": "https://example.com/meridian-physio/new-patient",
+    "name": "Meridian Physio — new patient landing page",
+    "conversion_goal": "A completed new-patient booking enquiry submitted through the form on the page.",
+    "audience": "Adults 30-60 in the local catchment with a recent musculoskeletal injury or persistent pain, arriving from paid search on injury-specific terms. Most are choosing a clinic for the first time and are comparing two or three.",
+    "current_metrics": [
+      {
+        "label": "Sessions",
+        "value": "4,180",
+        "period": "1 Aug – 31 Aug 2026",
+        "source": "Client-supplied GA4 export"
+      },
+      {
+        "label": "Form submissions",
+        "value": "51",
+        "period": "1 Aug – 31 Aug 2026",
+        "source": "Client-supplied GA4 export"
+      },
+      {
+        "label": "Enquiry rate",
+        "value": "1.22%",
+        "period": "1 Aug – 31 Aug 2026",
+        "source": "Derived from client-supplied GA4 export"
+      },
+      {
+        "label": "Mobile share of sessions",
+        "value": "71%",
+        "period": "1 Aug – 31 Aug 2026",
+        "source": "Client-supplied GA4 export"
+      },
+      {
+        "label": "Paid search spend",
+        "value": "A$3,400/month",
+        "period": "August 2026",
+        "source": "Client-supplied Google Ads summary"
+      }
+    ]
+  },
+  "audited_on": "2026-09-04",
+  "delivered_on": "2026-09-08",
+  "rubric_version": "v1",
+  "verdict": "The page reads as a practice brochure, not as an answer to the question the visitor arrived with. Most of the recoverable enquiries are lost in the first screen and in the form — both are cheap to change. The measurement problem is listed second because until it is fixed, nothing else can be judged.",
+  "exclusions": [
+    "This is a specimen report produced to demonstrate the deliverable. Meridian Physio is not a real practice, the page audited is a mock, and every metric shown is illustrative rather than measured."
+  ],
+  "findings": [
+    {
+      "id": "headline-outcome--9dc6f1fd",
+      "check": "headline-outcome",
+      "locator": "hero h1",
+      "title": "The headline describes the practice, not the visitor's problem",
+      "pillar": "structural",
+      "severity": "critical",
+      "effort": "quick",
+      "observation": "The first line on the page is \"Evidence-based physiotherapy, delivered with care\". It states a property of the practice. The supporting line — \"a modern practice combining hands-on treatment with exercise prescription and a patient-first philosophy\" — restates the same property in more words.\n\nVisitors arrive from paid search on injury-specific terms: shoulder pain, knee rehab, back pain. Nothing in the first screen names an injury, a timeframe, or an outcome. The words the visitor typed do not appear anywhere above the fold.",
+      "evidence": [
+        {
+          "kind": "screenshot",
+          "src": "assets/hero-desktop.png",
+          "caption": "First screen at 1280px. The headline and subheading both describe the practice; no injury, outcome or timeframe appears.",
+          "viewport": "desktop 1280x820"
+        },
+        {
+          "kind": "metric",
+          "label": "Enquiry rate",
+          "value": "1.22% (51 enquiries / 4,180 sessions)",
+          "period": "1 – 31 August 2026",
+          "source": "Client-supplied GA4 export"
+        }
+      ],
+      "impact": {
+        "user": "A visitor searching for help with a specific injury cannot tell in the first two seconds whether this clinic treats it. They have two or three other tabs open with the same question, and no reason to prefer this one.",
+        "business": "The most expensive traffic on the site — paid search on high-intent injury terms — lands on a page that does not confirm the match. Enquiries are lost before any of the practice's actual advantages are read."
+      },
+      "recommendations": {
+        "quick": "Replace the headline with the visitor's problem and the outcome. Three to test, in preference order: \"Shoulder, knee or back pain? Assessed and treated this week.\" / \"See a physio within 48 hours — most patients start treatment at the first visit.\" / \"Get a clear diagnosis and a plan at your first appointment.\" Move \"evidence-based\" to a supporting line where it does useful work.",
+        "medium": "Split the page by injury group so that the headline matches the ad group that sent the visitor. Three variants (shoulder, knee, back) covers the majority of paid spend.",
+        "long_term": "Build headline selection into the campaign structure so every ad group lands on copy that repeats its own search term."
+      },
+      "rubric_version": "v1"
+    },
+    {
+      "id": "analytics-integrity--0d2adf65",
+      "check": "analytics-integrity",
+      "locator": "booking form submit event",
+      "title": "Enquiries are counted on page view, not on submission",
+      "pillar": "behavioral",
+      "severity": "high",
+      "effort": "medium",
+      "observation": "The conversion event fires on load of the thank-you page. That page is directly reachable, is indexed, and receives its own organic traffic. The 51 \"form submissions\" in the August export therefore include visits that never submitted anything.\n\nNo submit-event is recorded on the form itself, so there is no way to separate the two, and no way to tell how many submissions failed validation.",
+      "evidence": [
+        {
+          "kind": "note",
+          "text": "The thank-you URL returns 200 and renders fully when requested directly, with no referrer or session check.",
+          "source": "Direct request during audit, 4 September 2026"
+        },
+        {
+          "kind": "metric",
+          "label": "Form submissions (as reported)",
+          "value": "51",
+          "period": "1 – 31 August 2026",
+          "source": "Client-supplied GA4 export — conversion event fires on thank-you page view"
+        }
+      ],
+      "impact": {
+        "user": "None directly. The visitor is unaffected.",
+        "business": "Every decision about this page is being made against a number that is inflated by an unknown amount. Campaign optimisation, budget allocation and any assessment of the changes in this report all inherit that error. This is listed second because it is the finding that makes the others measurable."
+      },
+      "recommendations": {
+        "quick": "Add a submit-listener event on the form so that a genuine submission is recorded separately from the thank-you page view. Keep both events for a fortnight so the gap between them is quantified.",
+        "medium": "Make the thank-you page unreachable without a submission token and mark it noindex. Add a failed-validation event so abandoned submissions are visible.",
+        "long_term": "Reconcile enquiries against bookings actually made in the practice management system, so the page is measured against revenue rather than against form fills."
+      },
+      "rubric_version": "v1"
+    },
+    {
+      "id": "primary-cta-clarity--2252ea92",
+      "check": "primary-cta-clarity",
+      "locator": "hero CTA button",
+      "title": "\"Submit\" does not say what the visitor gets",
+      "pillar": "structural",
+      "severity": "high",
+      "effort": "quick",
+      "observation": "The form is headed \"Get in touch\", the hint reads \"a member of our team will be in contact\", the button reads \"Submit\", and the closing line reads \"We respond to all enquiries.\"\n\nAcross four pieces of copy, the page never states what happens next or when. A visitor with a painful shoulder is trying to work out whether they will be seen this week; the page answers a different question.",
+      "evidence": [
+        {
+          "kind": "screenshot",
+          "src": "assets/hero-desktop.png",
+          "caption": "Form heading, hint, button and fine print. None of the four states an outcome or a timeframe.",
+          "viewport": "desktop 1280x820"
+        }
+      ],
+      "impact": {
+        "user": "The visitor cannot tell whether submitting the form books an appointment or joins a queue for a callback at an unknown time. That ambiguity is a reason to keep looking.",
+        "business": "The action with the highest intent on the page is described in the vaguest language on the page. It costs nothing to fix and is being paid for on every click."
+      },
+      "recommendations": {
+        "quick": "Rewrite the four pieces of copy as one promise. Heading: \"Book your first appointment\". Hint: \"Tell us what is going on and we will call you back the same business day with a time.\" Button: \"Request my appointment\". Delete the fine print.",
+        "medium": "State the actual next available appointment on the page and keep it current from the booking system."
+      },
+      "rubric_version": "v1"
+    },
+    {
+      "id": "form-friction--83db29a5",
+      "check": "form-friction",
+      "locator": "#booking-form",
+      "title": "The form asks for seven fields to arrange a phone call",
+      "pillar": "structural",
+      "severity": "high",
+      "effort": "medium",
+      "observation": "The form collects full name, email, phone, preferred practitioner, health fund, referral source and a free-text description. Only name and one contact method are needed to make the callback that the form promises.\n\nThree of the seven are asked before the visitor has any relationship with the practice: preferred practitioner (they do not know the practitioners), health fund (an administrative question), and referral source (a marketing question, asked of the visitor rather than measured).",
+      "evidence": [
+        {
+          "kind": "screenshot",
+          "src": "assets/hero-mobile.png",
+          "caption": "At 390px the form runs well past the first screen; the submit button is not reachable without scrolling through all seven fields.",
+          "viewport": "mobile 390x844"
+        },
+        {
+          "kind": "metric",
+          "label": "Mobile share of sessions",
+          "value": "71%",
+          "period": "1 – 31 August 2026",
+          "source": "Client-supplied GA4 export"
+        }
+      ],
+      "impact": {
+        "user": "Seven fields on a phone, three of which the visitor cannot answer confidently, is enough friction to defer the enquiry — and a deferred enquiry from a person in pain usually goes to whichever clinic asked for less.",
+        "business": "Fields that exist to save reception a question are being paid for in lost enquiries. Referral source in particular is being collected badly here and is available accurately from the ad platform."
+      },
+      "recommendations": {
+        "quick": "Cut the form to name, phone, and \"what is going on?\". Delete preferred practitioner and referral source outright; both are better handled on the callback or in the ad platform.",
+        "medium": "Move health fund to the confirmation step, after the appointment is agreed, where it is an administrative detail rather than a barrier.",
+        "long_term": "Replace the enquiry form with direct online booking against real availability. That removes the callback step the form exists to arrange."
+      },
+      "rubric_version": "v1"
+    },
+    {
+      "id": "traffic-quality--3660315a",
+      "check": "traffic-quality",
+      "title": "A quarter of paid spend is on terms this page cannot serve",
+      "pillar": "pre-build",
+      "severity": "moderate",
+      "effort": "medium",
+      "observation": "The August search terms report shows a material share of spend on queries about services the practice does not offer, and on informational queries — exercises, stretches, self-treatment — where the searcher is not looking for a clinic at all.\n\nThis matters for how the rest of this report is read: part of the low enquiry rate is not a page problem. Redesigning the page will not recover a click from someone who wanted a stretching video.",
+      "evidence": [
+        {
+          "kind": "metric",
+          "label": "Paid search spend",
+          "value": "A$3,400/month",
+          "period": "August 2026",
+          "source": "Client-supplied Google Ads summary"
+        },
+        {
+          "kind": "note",
+          "text": "Informational and out-of-scope service queries account for roughly a quarter of August spend in the supplied search terms report.",
+          "source": "Client-supplied Google Ads search terms report, August 2026"
+        }
+      ],
+      "impact": {
+        "user": "A visitor looking for exercises to do at home lands on a booking page and leaves. Nothing on the page could have helped them.",
+        "business": "Roughly a quarter of the monthly ad spend cannot convert on this page regardless of what the page says. Left in place, it also depresses the measured conversion rate and makes every change look less effective than it is."
+      },
+      "recommendations": {
+        "quick": "Add negative keywords for the informational and out-of-scope terms visible in the August search terms report. This is a change in the ad account, not on the page.",
+        "medium": "Segment the reporting so paid enquiry rate is measured only against in-scope terms, and this page is judged on the traffic it is built for.",
+        "long_term": "If the informational traffic is worth keeping, give it a destination of its own rather than pointing it at the booking page."
+      },
+      "rubric_version": "v1"
+    },
+    {
+      "id": "objection-coverage--c84dadf4",
+      "check": "objection-coverage",
+      "locator": "pricing section",
+      "title": "Price is never stated, and it is the first thing this buyer asks",
+      "pillar": "structural",
+      "severity": "moderate",
+      "effort": "medium",
+      "observation": "The page carries a \"HICAPS on site\" badge and nothing else about cost. There is no initial consultation fee, no out-of-pocket estimate, and no statement about what a health fund typically covers.\n\nFor a first-time patient choosing between clinics, cost and rebate are among the first two or three questions. The page defers both to the callback.",
+      "evidence": [
+        {
+          "kind": "screenshot",
+          "src": "assets/hero-desktop.png",
+          "caption": "The badge row is the only reference to cost anywhere in the first screen.",
+          "viewport": "desktop 1280x820"
+        }
+      ],
+      "impact": {
+        "user": "A visitor who needs to know whether a first appointment is $90 or $180 has to submit a form and wait for a call to find out. Some will; most will check a competitor who published the number.",
+        "business": "The practice is filtering out price-sensitive enquiries by attrition rather than by choice, and is spending callback time on questions the page could have answered."
+      },
+      "recommendations": {
+        "quick": "State the initial consultation fee and a typical out-of-pocket after a standard health fund rebate, in one line under the form.",
+        "medium": "Add a short fees section covering initial and subsequent appointments, rebates and what is included in the first visit.",
+        "long_term": "If price is a genuine competitive weakness, address it with what the fee buys — longer initial appointment, same-day imaging referral — rather than by omitting it."
+      },
+      "rubric_version": "v1"
+    },
+    {
+      "id": "mobile-rendering--eb7cc529",
+      "check": "mobile-rendering",
+      "locator": "hero, 390px viewport",
+      "title": "On mobile the argument is buried under the form",
+      "pillar": "structural",
+      "severity": "moderate",
+      "effort": "quick",
+      "observation": "At 390px the two-column layout stacks, putting the headline, subheading and four badges above the form. The visitor scrolls through all of it before reaching a single field, and past all seven fields before reaching the button.\n\nThe navigation is hidden at this width, so there is no path to fees, team or contact either. Seventy-one per cent of sessions see this version of the page.",
+      "evidence": [
+        {
+          "kind": "screenshot",
+          "src": "assets/hero-mobile.png",
+          "caption": "At 390px the form begins below the badge row; the submit button sits several screens down.",
+          "viewport": "mobile 390x844"
+        },
+        {
+          "kind": "metric",
+          "label": "Mobile share of sessions",
+          "value": "71%",
+          "period": "1 – 31 August 2026",
+          "source": "Client-supplied GA4 export"
+        }
+      ],
+      "impact": {
+        "user": "The majority of visitors meet a wall of practice description before anything they can act on, on the device where scrolling costs the most.",
+        "business": "The page is being judged on its desktop layout while three quarters of the traffic sees a different and worse one."
+      },
+      "recommendations": {
+        "quick": "Cut the badge row to two items at mobile widths and add a sticky call button so the primary action is always one tap away.",
+        "medium": "Reorder the mobile stack: headline, one line of proof, then the shortened form. Move the remaining practice description below it."
+      },
+      "rubric_version": "v1"
+    },
+    {
+      "id": "comprehension-gap--3660315a",
+      "check": "comprehension-gap",
+      "title": "\"Exercise prescription\" is not read as treatment",
+      "pillar": "user-testing",
+      "severity": "low",
+      "effort": "quick",
+      "observation": "Read cold, the subheading's \"exercise prescription\" is clinical vocabulary. To a first-time patient it reads as being sent home with a sheet of exercises rather than being treated — which is close to the opposite of what the practice means by it.\n\nThe same applies to \"patient-first philosophy\", which carries no information a competitor could not also claim.",
+      "evidence": [
+        {
+          "kind": "note",
+          "text": "Read against the assumed-knowledge and comprehension checks in rubric v1: both phrases require the reader to already hold the practice's own framing.",
+          "source": "Cold read during audit, 4 September 2026"
+        }
+      ],
+      "impact": {
+        "user": "A visitor in pain reads the one differentiator on the page as a reason to expect less hands-on treatment, not more.",
+        "business": "The practice's actual method is being described in language that undersells it. Cheap to correct, but low priority against the four findings above."
+      },
+      "recommendations": {
+        "quick": "Say it in the patient's words: \"hands-on treatment, plus a home programme so the problem does not come back\". Delete \"patient-first philosophy\"."
+      },
+      "rubric_version": "v1"
+    }
+  ]
+}
