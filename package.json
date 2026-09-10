@@ -20,7 +20,9 @@
     "serve": "node src/server.ts"
   },
   "dependencies": {
+    "@sparticuz/chromium-min": "152.0.0",
     "playwright": "1.63.0",
+    "playwright-core": "1.63.0",
     "zod": "4.5.4"
   },
   "devDependencies": {

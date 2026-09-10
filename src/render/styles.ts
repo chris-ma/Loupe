@@ -14,8 +14,19 @@ export function pageHeightMm(brand: Brand): number {
   return brand.page.format === "Letter" ? 279.4 : 297;
 }
 
-export function stylesheet(brand: Brand): string {
+/**
+ * Height reserved at the top of every page for the draft banner, in
+ * millimetres. Shared with template.ts, which is where the banner itself and
+ * the body padding that clears it are rendered — this file only needs the
+ * number to keep `--content-h` (below) consistent with that padding, so a
+ * full-bleed sheet like the cover doesn't overflow by exactly the banner's
+ * height onto a near-blank second page.
+ */
+export const DRAFT_BANNER_CLEARANCE_MM = 8;
+
+export function stylesheet(brand: Brand, options: { draft?: boolean } = {}): string {
   const { palette: c, typography: t } = brand;
+  const draftClearance = options.draft ? DRAFT_BANNER_CLEARANCE_MM : 0;
 
   return `
 :root {
@@ -34,7 +45,7 @@ export function stylesheet(brand: Brand): string {
   --font-body: ${t.bodyStack};
   --font-mono: ${t.monoStack};
   /* Printable height of one page: used by full-bleed sheets such as the cover. */
-  --content-h: ${(pageHeightMm(brand) - brand.page.marginMm.top - brand.page.marginMm.bottom).toFixed(2)}mm;
+  --content-h: ${(pageHeightMm(brand) - brand.page.marginMm.top - brand.page.marginMm.bottom - draftClearance).toFixed(2)}mm;
 }
 
 /* Page margins are applied by the PDF renderer, not here: Chromium reserves the

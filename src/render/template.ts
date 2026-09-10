@@ -11,7 +11,7 @@ import {
 import type { Audit, Evidence, Finding } from "../schema/audit.ts";
 import type { Brand } from "../schema/brand.ts";
 import { esc, paras } from "./html.ts";
-import { stylesheet } from "./styles.ts";
+import { DRAFT_BANNER_CLEARANCE_MM, stylesheet } from "./styles.ts";
 
 /**
  * Report template — BR §7.1.
@@ -39,6 +39,14 @@ export interface RenderContext {
   brand: Brand;
   /** Overrides the audit's own delivery date on the cover. Defaults to `delivered_on`, then today. */
   renderedOn?: string;
+  /**
+   * Stamps every page with a fixed "AI-GENERATED DRAFT — UNREVIEWED" banner and
+   * relabels the footer accordingly. For the internal first-pass pipeline only
+   * (see api/submit.ts) — never set this for a report a client will see. There
+   * is no separate "trust me, I checked" mode: a draft is either visibly a
+   * draft, or it renders through the normal path unmarked.
+   */
+  draft?: boolean;
 }
 
 /* ------------------------------------------------------------------ *
@@ -520,7 +528,7 @@ function appendixSheet(ctx: RenderContext): string {
  * ------------------------------------------------------------------ */
 
 export function renderReportHtml(ctx: RenderContext): string {
-  const { audit, brand } = ctx;
+  const { audit, brand, draft } = ctx;
   const deliveredOn = ctx.renderedOn ?? audit.delivered_on ?? audit.audited_on;
 
   const sheets = [
@@ -532,20 +540,73 @@ export function renderReportHtml(ctx: RenderContext): string {
     appendixSheet(ctx),
   ].filter(Boolean);
 
+  const title = draft
+    ? `DRAFT (unreviewed) — ${esc(brand.name)} audit — ${esc(audit.client.name)} — ${esc(audit.page.url)}`
+    : `${esc(brand.name)} audit — ${esc(audit.client.name)} — ${esc(audit.page.url)}`;
+
+  // Fixed, not printed inline in the flow: it has to survive independently of
+  // any single sheet, and must not be something a stray edit to one section
+  // could drop. `position: fixed` in Chromium's print renderer is fixed
+  // relative to each page's own content box, so this repeats correctly on
+  // every printed page with no extra work.
+  //
+  // Clearing it is the part that needs care. `position: fixed` never affects
+  // document flow, on any page, so the cover's logo would sit directly under
+  // the banner by default. The fix is on <body> below: padding-top, plus
+  // `box-decoration-break: clone` so that padding re-applies to every page
+  // fragment rather than only the first — the ordinary print/pagination
+  // behaviour for a box split across pages is to keep top padding on the
+  // first fragment only, which would leave every page after the first
+  // uncleared.
+  const draftBanner = draft
+    ? `<div style="position:fixed;top:0;left:0;right:0;z-index:999;
+                  background:#a02020;color:#fff;font-family:${brand.typography.bodyStack};
+                  font-size:8pt;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+                  text-align:center;padding:3pt 0;">
+  AI-generated draft — unreviewed — internal use only — not sent to the client
+</div>`
+    : "";
+  const draftBodyStyle = draft
+    ? ` style="padding-top:${DRAFT_BANNER_CLEARANCE_MM}mm;box-decoration-break:clone;-webkit-box-decoration-break:clone;"`
+    : "";
+
   return `<!doctype html>
 <html lang="en-AU">
 <head>
 <meta charset="utf-8">
-<title>${esc(brand.name)} audit — ${esc(audit.client.name)} — ${esc(audit.page.url)}</title>
+<title>${title}</title>
 <style>
-${stylesheet(brand)}
+${stylesheet(brand, { draft })}
 </style>
 </head>
-<body>
+<body${draftBodyStyle}>
+${draftBanner}
 ${sheets.join("\n\n")}
 </body>
 </html>
 `;
+}
+
+/**
+ * PDF page margins for a render context. Centralised here — not in
+ * render/pdf.ts, which imports the full `playwright` package — so that the
+ * Lambda-based draft pipeline (api/submit.ts, which uses `playwright-core`
+ * instead) can share this without pulling Playwright's full browser-management
+ * code into its function bundle.
+ *
+ * The bottom margin leaves room for the footer band. Draft-mode clearance for
+ * the banner is a document-flow concern (body padding + box-decoration-break,
+ * above in renderReportHtml), not a PDF-margin one, so this needs no draft
+ * case of its own.
+ */
+export function pdfMargin(brand: Brand, _options: { draft?: boolean } = {}) {
+  const m = brand.page.marginMm;
+  return {
+    top: `${m.top}mm`,
+    right: `${m.right}mm`,
+    bottom: `${m.bottom}mm`,
+    left: `${m.left}mm`,
+  };
 }
 
 /**
@@ -555,8 +616,10 @@ ${sheets.join("\n\n")}
  * from the brand config rather than inherited.
  */
 export function renderFooterTemplate(ctx: RenderContext): string {
-  const { audit, brand } = ctx;
-  const stamp = `Rubric ${audit.rubric_version} · Template ${TEMPLATE_VERSION} · Brand ${brand.key}`;
+  const { audit, brand, draft } = ctx;
+  const stamp = draft
+    ? `DRAFT, UNREVIEWED · Rubric ${audit.rubric_version} · Template ${TEMPLATE_VERSION}`
+    : `Rubric ${audit.rubric_version} · Template ${TEMPLATE_VERSION} · Brand ${brand.key}`;
   // A table, not flexbox: Chromium renders header/footer templates in an
   // isolated document whose root box does not honour flex layout reliably.
   // Sizes are in px because that document is not scaled the way the page is.
@@ -569,7 +632,7 @@ export function renderFooterTemplate(ctx: RenderContext): string {
 <table style="width:calc(100% - ${gutters}mm);border-collapse:collapse;table-layout:fixed;
               margin:0 ${brand.page.marginMm.right}mm ${(brand.page.marginMm.bottom / 2.5).toFixed(1)}mm ${brand.page.marginMm.left}mm;">
   <tr>
-    <td style="${cell}text-align:left;">${esc(brand.footer)} · ${esc(audit.client.name)}</td>
+    <td style="${cell}text-align:left;">${draft ? "DRAFT" : esc(brand.footer)} · ${esc(audit.client.name)}</td>
     <td style="${cell}text-align:center;">${esc(stamp)}</td>
     <td style="${cell}text-align:right;width:16%;"><span class="pageNumber"></span> / <span class="totalPages"></span></td>
   </tr>

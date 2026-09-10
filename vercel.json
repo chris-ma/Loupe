@@ -1,7 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "",
   "buildCommand": "",
-  "outputDirectory": "site"
+  "outputDirectory": "site",
+  "env": {
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
+  },
+  "functions": {
+    "api/submit.ts": {
+      "maxDuration": 60,
+      "memory": 3009
+    }
+  }
 }

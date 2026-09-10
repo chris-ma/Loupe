@@ -177,15 +177,19 @@ sample report, with no "contact us for pricing" and no call required to buy. It
 is static — plain HTML and CSS, no build step — and reuses the report's palette
 and type stacks so the page and the document read as one thing.
 
-Deployed on Vercel with the project's root directory set to `site`, so the build
-never touches the repo's `package.json` and never tries to install Playwright.
+Deployed on Vercel via `vercel.json` at the repo root: `outputDirectory: "site"`
+serves this folder as static output, with `framework: null` and an empty
+`buildCommand` so nothing tries to build the report generator itself. The
+project's Root Directory in the dashboard is left at the repo root — not set to
+`site` — because `api/submit.ts` (below) has to be discoverable there; Vercel's
+`/api` convention is resolved from Root Directory, independent of
+`outputDirectory`.
 
-**Two values must be set before it goes to production**, both in
-`site/index.html` and both marked with a comment in the buy section:
-
-1. The checkout `href` on `#checkout` — currently a `mailto:` that pre-fills the
-   four intake questions. Replace with a Stripe payment link or equivalent.
-2. The order email address, `orders@example.com`.
+**One value must be set before the offer page goes to production**, in
+`site/index.html`, marked with a comment in the buy section: the checkout
+`href` on `#checkout` — currently a `mailto:` that pre-fills the four intake
+questions. Replace with a Stripe payment link or equivalent once you're
+charging through it directly rather than by invoice.
 
 Refresh the sample images after changing the report:
 
@@ -194,6 +198,89 @@ npm run sample
 cp examples/meridian-physio-specimen.pdf site/sample-report.pdf
 pdftoppm -jpeg -jpegopt quality=82 -r 150 -f 1 -l 3 site/sample-report.pdf site/assets/page
 ```
+
+## The AI draft pipeline
+
+`site/intake.html` is the real §6.1 intake form (`POST /api/submit`), sent to a
+client after payment clears — the payment step above is untouched. Submitting
+it does not deliver anything to the client. It runs an unreviewed AI first pass
+and emails the result — a watermarked draft PDF plus the raw findings JSON — to
+the operator only, as a starting point for the human-delivered report.
+
+This exists because BR §8.1 makes the price part of the product: an
+unreviewed AI report is exactly what a sub-US$500 "automated report with no
+human interpretation" looks like, and that is not what's being sold at this
+price. So the draft is structurally unable to pass as the deliverable — every
+page carries a fixed red banner (`AI-generated draft — unreviewed — internal
+use only — not sent to the client`), and the footer stamp changes to `DRAFT,
+UNREVIEWED` in place of the usual rubric/template/brand stamp. Set `draft: true`
+on a `RenderContext` (`src/render/template.ts`) to get this; there is no
+"reviewed" flag — a draft is either visibly a draft, or it goes through the
+ordinary unmarked path.
+
+**What the pipeline does**, all synchronously within one request (see the
+module comment in `api/submit.ts` for why this doesn't hand off to a
+background task):
+
+1. Validates the intake payload, checks the honeypot field, and resolves the
+   submitted URL's hostname to rule out anything pointing at a private,
+   loopback, or link-local address before a server-side browser ever touches
+   it.
+2. Captures the page with `playwright-core` + `@sparticuz/chromium-min`
+   (desktop 1440×900, mobile 390×844).
+3. Calls Claude with both screenshots and the intake's stated goal/audience,
+   forced (via `tool_choice`) to return structured output matching
+   `src/schema/draft.ts` — a narrower schema than the real findings schema: no
+   `id`, no `rubric_version` (both are computed afterward, never trusted from
+   the model), no `metric` evidence kind (the model has no analytics access,
+   so it cannot be allowed to state a number), and screenshot evidence carries
+   only a `viewport` label — the actual captured image is substituted in code,
+   so a finding can never cite a screenshot that wasn't really taken.
+4. Assembles a full `Audit`, runs it through the same `validateAudit()` every
+   manually authored findings file goes through, and renders it with the
+   existing template in draft mode.
+5. Emails the PDF and the findings JSON to `REPORT_RECIPIENT_EMAIL` via Resend.
+   The findings JSON is there so a real edit is a `loupe render` away, not a
+   re-transcription.
+
+**Required environment variables** (Vercel → Project → Settings → Environment
+Variables — this repo has no tool access to set these; do it in the dashboard):
+
+| Variable | Source |
+|---|---|
+| `ANTHROPIC_API_KEY` | console.anthropic.com — your own key, own billing |
+| `RESEND_API_KEY` | resend.com — free tier covers this volume easily |
+| `CHROMIUM_PACK_URL` | see below — **do not guess this** |
+| `REPORT_RECIPIENT_EMAIL` | optional, defaults to `crispy-studios@hotmail.com` |
+| `REPORT_FROM_EMAIL` | optional, defaults to Resend's shared test sender |
+
+`CHROMIUM_PACK_URL` needs care: `@sparticuz/chromium-min` doesn't bundle a
+Chromium binary (that's the point — it keeps the function under Vercel's size
+limit) and instead downloads one at cold start from a URL you supply. The
+correct asset changes with the package version and its filename has changed
+shape across releases, so this isn't hardcoded anywhere in the code — find the
+`.tar` asset matching the installed version at
+https://github.com/Sparticuz/chromium/releases (the version is pinned in
+`package.json`; keep them in lockstep on upgrade) and set its direct download
+URL as this variable. Without it, `POST /api/submit` fails clearly rather than
+silently — `launchBrowser()` checks for it up front.
+
+**Known limits, not yet hardened:**
+
+- No rate limiting beyond the honeypot and per-request timeouts. Each
+  submission costs a real Claude vision call plus Vercel compute; fine at the
+  "10 known contacts" volume in BR §12.6, worth revisiting before wider
+  traffic.
+- Runs synchronously rather than on a background task, so the client's browser
+  waits (up to `maxDuration: 60` in `vercel.json`) for a "received" confirmation.
+  `site/intake.html` shows a pending state so this doesn't read as broken.
+- No database — a submission's only record is the email it produces. Fine
+  for "email me a draft"; not fine if failed/duplicate submissions need
+  tracking later.
+- The `#checkout` mailto in `site/index.html` still pre-fills the four intake
+  questions in its body, which now duplicate `site/intake.html`. Left
+  unchanged since the buy step was explicitly out of scope here — worth
+  simplifying that copy once `intake.html` is the only place those get asked.
 
 ## Tests
 

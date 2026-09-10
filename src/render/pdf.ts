@@ -1,6 +1,5 @@
 import { chromium, type Browser } from "playwright";
-import type { Brand } from "../schema/brand.ts";
-import { renderFooterTemplate, renderReportHtml, type RenderContext } from "./template.ts";
+import { pdfMargin, renderFooterTemplate, renderReportHtml, type RenderContext } from "./template.ts";
 
 /**
  * PDF output — BR §7.3 ("Output: PDF via headless browser render").
@@ -14,17 +13,6 @@ import { renderFooterTemplate, renderReportHtml, type RenderContext } from "./te
 export interface PdfOptions {
   /** Chromium binary to use. Defaults to Playwright's own download, then $LOUPE_CHROMIUM_PATH. */
   executablePath?: string;
-}
-
-function pdfMargin(brand: Brand) {
-  const m = brand.page.marginMm;
-  return {
-    top: `${m.top}mm`,
-    right: `${m.right}mm`,
-    // Chromium draws the footer band inside the bottom margin, so leave it room.
-    bottom: `${m.bottom}mm`,
-    left: `${m.left}mm`,
-  };
 }
 
 export class ReportRenderer {
@@ -54,7 +42,7 @@ export class ReportRenderer {
         format: ctx.brand.page.format,
         printBackground: true,
         preferCSSPageSize: false,
-        margin: pdfMargin(ctx.brand),
+        margin: pdfMargin(ctx.brand, { draft: ctx.draft }),
         displayHeaderFooter: true,
         headerTemplate: "<span></span>",
         footerTemplate: renderFooterTemplate(ctx),

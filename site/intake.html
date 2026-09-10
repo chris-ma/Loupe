@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loupe — Audit intake</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='13' cy='13' r='8.5' fill='none' stroke='%231f4b7a' stroke-width='2.6'/%3E%3Cline x1='19' y1='19' x2='26' y2='26' stroke='%231f4b7a' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+
+<style>
+:root {
+  --surface: #ffffff;
+  --surface-alt: #f6f5f2;
+  --ink: #16171a;
+  --ink-muted: #5f636b;
+  --rule: #d9d7d1;
+  --accent: #1f4b7a;
+  --on-accent: #ffffff;
+  --critical: #a02020;
+  --font-heading: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  --font-body: "Helvetica Neue", Helvetica, Arial, "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.55;
+}
+.wrap { max-width: 34rem; margin: 0 auto; padding: clamp(1.5rem, 5vw, 3rem) 1.25rem 4rem; }
+h1 { font-family: var(--font-heading); font-weight: 600; font-size: clamp(1.6rem, 4vw, 2.1rem); margin: 0 0 0.5rem; letter-spacing: -0.01em; }
+p.lede { color: var(--ink-muted); margin: 0 0 2rem; }
+label { display: block; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em; margin: 1.25rem 0 0.35rem; }
+label .hint { font-weight: 400; letter-spacing: normal; color: var(--ink-muted); display: block; font-size: 0.78rem; margin-top: 0.15rem; }
+input, textarea {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  font: inherit;
+  font-size: 0.95rem;
+  background: var(--surface);
+  color: var(--ink);
+}
+input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+textarea { resize: vertical; min-height: 5rem; }
+/* Honeypot: present in the DOM for bots, invisible and unreachable for people. */
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+button {
+  margin-top: 1.75rem;
+  width: 100%;
+  padding: 0.85rem 1.2rem;
+  font: inherit;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--on-accent);
+  border: 1.5px solid var(--accent);
+  border-radius: 3px;
+  cursor: pointer;
+}
+button:disabled { opacity: 0.6; cursor: default; }
+button:hover:not(:disabled) { background: #17385c; }
+.status { margin-top: 1rem; font-size: 0.9rem; padding: 0.75rem 0.9rem; border-radius: 3px; display: none; }
+.status.show { display: block; }
+.status.ok { background: var(--surface-alt); color: var(--ink); border: 1px solid var(--rule); }
+.status.err { background: #fbecec; color: var(--critical); border: 1px solid #f0c6c6; }
+.status.pending { background: var(--surface-alt); color: var(--ink-muted); border: 1px solid var(--rule); }
+footer { margin-top: 3rem; font-size: 0.8rem; color: var(--ink-muted); border-top: 1px solid var(--rule); padding-top: 1rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Audit intake</h1>
+  <p class="lede">
+    Once we have this, your audit is underway. Takes under ten minutes to fill in — the more specific
+    you are about the goal and the audience, the sharper the findings.
+  </p>
+
+  <form id="intake-form" novalidate>
+    <label for="client_name">Your name or company</label>
+    <input id="client_name" name="client_name" required maxlength="200" autocomplete="name">
+
+    <label for="contact_email">Email
+      <span class="hint">Where the finished report goes.</span>
+    </label>
+    <input id="contact_email" name="contact_email" type="email" required maxlength="320" autocomplete="email">
+
+    <label for="page_url">Page URL
+      <span class="hint">The one landing page or conversion flow to audit.</span>
+    </label>
+    <input id="page_url" name="page_url" type="url" required maxlength="2000" placeholder="https://example.com/pricing">
+
+    <label for="conversion_goal">What counts as a conversion on this page?
+      <span class="hint">A booking, a purchase, a signed-up email — the single action the page exists to produce.</span>
+    </label>
+    <textarea id="conversion_goal" name="conversion_goal" required maxlength="400"></textarea>
+
+    <label for="audience">Who is this page for?
+      <span class="hint">Describe the visitor — where they come from, what they already know, what they're deciding between.</span>
+    </label>
+    <textarea id="audience" name="audience" required maxlength="600"></textarea>
+
+    <label for="metrics_notes">Anything you already know? <span class="hint">(optional)</span>
+      <span class="hint">Current conversion rate, traffic source, analytics access, suspicions you already have — whatever's useful.</span>
+    </label>
+    <textarea id="metrics_notes" name="metrics_notes" maxlength="2000"></textarea>
+
+    <div class="hp" aria-hidden="true">
+      <label for="company_website">Company website</label>
+      <input id="company_website" name="company_website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <button type="submit" id="submit-btn">Submit intake</button>
+    <div class="status" id="status" role="status"></div>
+  </form>
+
+  <footer>Loupe — landing page audits</footer>
+</div>
+
+<script>
+(function () {
+  var form = document.getElementById('intake-form');
+  var btn = document.getElementById('submit-btn');
+  var status = document.getElementById('status');
+
+  function setStatus(kind, text) {
+    status.className = 'status show ' + kind;
+    status.textContent = text;
+  }
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    btn.disabled = true;
+    setStatus('pending', 'Sending — this can take up to a minute, please stay on this page.');
+
+    var data = Object.fromEntries(new FormData(form).entries());
+
+    fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+      .then(function (res) {
+        return res.json().then(function (body) { return { res: res, body: body }; });
+      })
+      .then(function (result) {
+        if (result.res.ok && result.body.ok) {
+          form.hidden = true;
+          setStatus('ok', 'Received — thank you. You will have your audit within five business days.');
+        } else {
+          btn.disabled = false;
+          setStatus('err', result.body.error || 'Something went wrong. Please try again.');
+        }
+      })
+      .catch(function () {
+        btn.disabled = false;
+        setStatus('err', 'Could not reach the server. Check your connection and try again.');
+      });
+  });
+})();
+</script>
+</body>
+</html>
